@@ -4,11 +4,23 @@ import type { Request } from 'express';
 import { AuthenticatedUser } from '../interfaces/authenticated-user.interface.js';
 
 export const CurrentUser = createParamDecorator(
-  (_data: unknown, context: ExecutionContext): AuthenticatedUser => {
+  (
+    data: keyof AuthenticatedUser | undefined,
+    context: ExecutionContext,
+  ):
+    | AuthenticatedUser
+    | AuthenticatedUser[keyof AuthenticatedUser]
+    | undefined => {
     const request = context
       .switchToHttp()
-      .getRequest<Request & { user: AuthenticatedUser }>();
+      .getRequest<Request & { user?: AuthenticatedUser }>();
 
-    return request.user;
+    const user = request.user;
+
+    if (!user) {
+      return undefined;
+    }
+
+    return data ? user[data] : user;
   },
 );
