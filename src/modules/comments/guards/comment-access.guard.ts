@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   CanActivate,
   ExecutionContext,
   ForbiddenException,
@@ -8,6 +9,9 @@ import {
 
 import { PrismaService } from '../../../database/prisma/prisma.service.js';
 import { WorkspaceRole } from '../../../../generated/prisma/client.js';
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 interface CommentRequest {
   user: {
@@ -36,6 +40,14 @@ export class CommentAccessGuard implements CanActivate {
 
     if (!taskId) {
       throw new NotFoundException('Task ID is required');
+    }
+
+    if (!UUID_REGEX.test(taskId)) {
+      throw new BadRequestException('Invalid task ID');
+    }
+
+    if (commentId && !UUID_REGEX.test(commentId)) {
+      throw new BadRequestException('Invalid comment ID');
     }
 
     const task = await this.prisma.task.findFirst({

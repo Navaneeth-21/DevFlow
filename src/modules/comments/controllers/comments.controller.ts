@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -40,7 +41,7 @@ export class CommentsController {
 
   @Post()
   create(
-    @Param('taskId') taskId: string,
+    @Param('taskId', new ParseUUIDPipe()) taskId: string,
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateCommentDto,
   ) {
@@ -48,22 +49,25 @@ export class CommentsController {
   }
 
   @Get()
-  findAll(@Param('taskId') taskId: string, @Query() dto: ListCommentsDto) {
+  findAll(
+    @Param('taskId', new ParseUUIDPipe()) taskId: string,
+    @Query() dto: ListCommentsDto,
+  ) {
     return this.commentsService.findAll(taskId, dto);
   }
 
   @Get(':commentId')
   findOne(
-    @Param('taskId') taskId: string,
-    @Param('commentId') commentId: string,
+    @Param('taskId', new ParseUUIDPipe()) taskId: string,
+    @Param('commentId', new ParseUUIDPipe()) commentId: string,
   ) {
     return this.commentsService.findOne(taskId, commentId);
   }
 
   @Patch(':commentId')
   update(
-    @Param('taskId') taskId: string,
-    @Param('commentId') commentId: string,
+    @Param('taskId', new ParseUUIDPipe()) taskId: string,
+    @Param('commentId', new ParseUUIDPipe()) commentId: string,
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateCommentDto,
   ) {
@@ -72,8 +76,8 @@ export class CommentsController {
 
   @Delete(':commentId')
   remove(
-    @Param('taskId') taskId: string,
-    @Param('commentId') commentId: string,
+    @Param('taskId', new ParseUUIDPipe()) taskId: string,
+    @Param('commentId', new ParseUUIDPipe()) commentId: string,
     @CurrentUser() user: AuthenticatedUser,
     @Req() req: CommentRequest,
   ) {
