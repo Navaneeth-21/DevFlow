@@ -32,6 +32,7 @@ interface TokenPair {
 
 type RefreshTokenRecord = {
   id: string;
+  userId: string;
   revokedAt: Date | null;
   expiresAt: Date;
   tokenHash: string;
@@ -183,6 +184,7 @@ export class AuthService {
 
     if (
       !storedToken ||
+      storedToken.userId !== payload.sub ||
       storedToken.revokedAt ||
       storedToken.expiresAt <= new Date()
     ) {
@@ -420,7 +422,7 @@ export class AuthService {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? 'none' : 'lax',
-        path: '/api/v1/auth',
+        path: this.getAuthCookiePath(),
         maxAge: this.parseDuration(
           this.configService.getOrThrow<string>('JWT_REFRESH_EXPIRES_IN'),
         ),
@@ -438,9 +440,16 @@ export class AuthService {
           this.configService.get<string>('NODE_ENV') === 'production'
             ? 'none'
             : 'lax',
-        path: '/api/v1/auth',
+        path: this.getAuthCookiePath(),
       },
     );
+  }
+
+  private getAuthCookiePath(): string {
+    const apiPrefix = this.configService.getOrThrow<string>('API_PREFIX');
+    const apiVersion = this.configService.getOrThrow<string>('API_VERSION');
+
+    return `/${apiPrefix.replace(/^\/+|\/+$/g, '')}/${apiVersion.replace(/^\/+|\/+$/g, '')}/auth`;
   }
 
   private parseDuration(duration: string): number {
