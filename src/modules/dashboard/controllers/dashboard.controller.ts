@@ -1,4 +1,10 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common';
 
 import { DashboardService } from '../services/dashboard.service.js';
 
@@ -13,7 +19,7 @@ export class DashboardController {
 
   @Get()
   async getDashboard(
-    @Param('workspaceId') workspaceId: string,
+    @Param('workspaceId', new ParseUUIDPipe()) workspaceId: string,
     @CurrentUser() user: { userId: string; email: string },
   ) {
     return this.dashboardService.getDashboard(workspaceId, user.userId);
