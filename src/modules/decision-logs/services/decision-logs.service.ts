@@ -256,10 +256,15 @@ export class DecisionLogsService {
       select: {
         workspaceId: true,
         userId: true,
+        workspace: {
+          select: {
+            deletedAt: true,
+          },
+        },
       },
     });
 
-    if (!membership) {
+    if (!membership || membership.workspace.deletedAt) {
       throw new ForbiddenException('You do not have access to this workspace');
     }
   }
